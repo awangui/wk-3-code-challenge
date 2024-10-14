@@ -64,8 +64,38 @@ function renderMovieList(movies) {
         filmItem.textContent = movie.title;
         filmItem.classList.add('film', 'item');
         filmItem.addEventListener('click', () => displayFirstMovie(movie));
+        
+        // Create delete button
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.style.marginLeft = '10px';
+        deleteButton.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent triggering the displayFirstMovie
+            deleteMovie(movie.id, filmItem);
+        });
+
+        filmItem.appendChild(deleteButton);
         filmList.appendChild(filmItem);
+        if (movie.capacity - movie.tickets_sold <= 0) {
+            filmItem.classList.add('sold-out');
+        }
     });
+}
+
+// Function to delete a movie from the server
+function deleteMovie(id, filmItem) {
+    fetch(`${baseURL}/${id}`, {
+        method: "DELETE"
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log("Movie deleted successfully");
+            filmItem.remove(); // Remove the movie item from the list
+        } else {
+            console.log("Error deleting movie:", response.statusText);
+        }
+    })
+    .catch(error => console.log("Error deleting movie:", error));
 }
 
 // Function to fetch all movies and render the list
